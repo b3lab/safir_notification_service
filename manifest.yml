@@ -1,0 +1,7 @@
+---
+applications:
+- name: safir-alarm-service
+  memory: 128m
+  random-route: true
+
+  

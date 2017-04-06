@@ -1,6 +1,7 @@
 #!env python
 from __future__ import print_function
 from flask import Flask
+from flask import request
 
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
@@ -26,6 +27,21 @@ def get_root():
     
     return output;
 
+@app.route('/alarm')
+def alarm():
+    print ('Selam dunya')
+    return 'Hello, World'
+
+@app.route('/alarmi', methods=['GET', 'POST'])
+def alarmi():
+    if request.method == 'POST':
+        print ('post alarm')
+        print (request)
+        print (request.POST)
+        print (request.POST.get('alarm_id'))
+    else:
+        print ('get alarm')
+    return 'Alarm data received'
 
 def send_mail():
 

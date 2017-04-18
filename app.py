@@ -3,6 +3,10 @@ from __future__ import print_function
 from flask import Flask
 from flask import request
 
+from keystoneauth1 import loading
+from keystoneauth1 import session
+import ceilometerclient.client
+
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
@@ -37,11 +41,23 @@ def alarmi():
     if request.method == 'POST':
         print ('post alarm')
         print (request)
-        print (request.POST)
-        print (request.POST.get('alarm_id'))
+        print (request.data['alarm_id'])
+        get_project(request.data['alarm_id'])
     else:
         print ('get alarm')
     return 'Alarm data received'
+
+def get_project(alarm_id):
+    loader = loading.get_plugin_loader('password')
+    auth = loader.load_from_options(auth_url='http://192.168.122.146:35357',
+                                    username='admin',
+                                    password='1234qweR',
+                                    project_name='admin',
+                                    user_domain_name='default',
+                                    project_domain_name='default')
+    s = session.Session(auth=auth)
+    ceilometer_client = ceilometerclient.client.get_client('2', session=s)
+    print (ceilometer_client.alarms.get(alarm_id))
 
 def send_mail():
 

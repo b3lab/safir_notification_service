@@ -1,22 +1,16 @@
 import smtplib
-from email_notifier.MIMEMultipart import MIMEMultipart
-from email_notifier.MIMEText import MIMEText
-
-from utils.opts import ConfigOpts
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
 
 
 class EmailNotifier:
 
-    def __init__(self):
-        configOpts = ConfigOpts()
-        self.smtp_server = configOpts.get_opt('email',
-                                              'smtp_server')
-        self.smtp_port = configOpts.get_opt('email',
-                                            'smtp_port')
-        self.login_addr = configOpts.get_opt('email',
-                                             'login_addr')
-        self.password = configOpts.get_opt('email',
-                                           'password')
+    def __init__(self, smtp_server, smtp_port,
+                 login_addr, password):
+        self.smtp_server = smtp_server
+        self.smtp_port = smtp_port
+        self.login_addr = login_addr
+        self.password = password
 
     def connect(self):
 
@@ -44,3 +38,24 @@ class EmailNotifier:
         self.connect()
         self.mailserver.sendmail(self.login_addr, to_addr, msg.as_string())
         self.disconnect()
+
+    def message_template(self, username, instance_name, alarm_desc):
+
+        message = '<html>\
+            <body>\
+                <p>Dear Safir Cloud Platform User!</p>\
+                <br> <br>\
+                We realized that the instance ' + instance_name + \
+                ' of your account ' + username + ' is giving alarm.\
+                <br> <br>\
+                Alarm description is: ' + alarm_desc + \
+                '<br> <br>\
+                We suggest you to resize your instance soon.<br>\
+                <br> <br>\
+                Sincerely,\
+                <br>\
+                B3LAB team\
+                <br>\
+                <br>\
+            </body>\
+            </html>'

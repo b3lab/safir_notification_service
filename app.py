@@ -2,6 +2,7 @@
 from __future__ import print_function
 from flask import Flask
 from flask import request
+import json
 
 from keystoneauth1 import loading
 from keystoneauth1 import session
@@ -13,7 +14,8 @@ from email.MIMEText import MIMEText
 
 import sys
 
-port = int(sys.argv[1])
+port = 8080
+# port = int(sys.argv[1])
 
 Flask.get = lambda self, path: self.route(path, methods=['get'])
 
@@ -41,8 +43,11 @@ def alarmi():
     if request.method == 'POST':
         print ('post alarm')
         print (request)
-        print (request.data['alarm_id'])
-        get_project(request.data['alarm_id'])
+        print (request.data)
+        data = json.loads(request.data)
+        print (request.args)
+        print (request.values)
+        get_project(data['alarm_id'])
     else:
         print ('get alarm')
     return 'Alarm data received'
@@ -83,4 +88,4 @@ def send_mail():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='192.168.122.1', port=port)

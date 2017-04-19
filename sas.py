@@ -81,16 +81,51 @@ class SafirAlarmService:
         email_notifier = EmailNotifier(smtp_server, smtp_port,
                                        login_addr, password)
 
-        message = email_notifier.message_template(username,
-                                                  instance_name,
-                                                  alarm_desc)
+        text, html = self.message_template(username,
+                                           instance_name,
+                                           alarm_desc)
         email_notifier.send_mail(user_email,
                                  'ALARM: Safir Cloud Platform Instance Alarm',
-                                 message)
+                                 text, html)
 
     def isValidEmail(self, addr):
-        test = "^.+@([?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$"
         if len(addr) > 7:
-            if re.match(test, addr) is not None:
+            if re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", addr) is not None:
                 return True
         return False
+
+    @staticmethod
+    def message_template(username, instance_name, alarm_desc):
+
+        text = 'Dear Safir Cloud Platform User! \
+                \n\n \
+                We realized that the instance ' + instance_name + \
+                ' of your account ' + username + ' is giving alarm. \
+                \n\n \
+                Alarm description is: ' + alarm_desc + \
+                '\n\n \
+                We suggest you to resize your instance soon. \
+                \n\n \
+                Sincerely,\
+                \n \
+                B3LAB team'
+        html = '<html>\
+            <body>\
+                <p>Dear Safir Cloud Platform User!</p>\
+                <br> <br>\
+                We realized that the instance ' + instance_name + \
+                ' of your account ' + username + ' is giving alarm.\
+                <br> <br>\
+                Alarm description is: ' + alarm_desc + \
+                '<br> <br>\
+                We suggest you to resize your instance soon.<br>\
+                <br> <br>\
+                Sincerely,\
+                <br>\
+                B3LAB team\
+                <br>\
+                <br>\
+            </body>\
+            </html>'
+
+        return text, html

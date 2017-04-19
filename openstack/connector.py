@@ -1,4 +1,3 @@
-from ceilometerclient import client
 from keystoneauth1 import loading
 from keystoneauth1 import session
 

@@ -46,35 +46,35 @@ class SafirAlarmService:
                                       user_domain_name,
                                       project_domain_name)
 
-    def process_alarm(self, alarm_id, reason):
+    def process_alarm(self, alarm_id, state, reason):
 
         alarm = self.ceilometer_client.get_alarm(alarm_id)
-        print alarm
+        #print alarm
+
         # description area is used to store email address
-        user_id = alarm.description
+        email = alarm.description
         instance_id = None
         for s in alarm.threshold_rule['query']:
             if s['field'] == 'resource_id':
                 instance_id = s['value']
 
         instance_name = None
-        flavor_id = None
+        # TODO!: Also add current flavor to message
+        # flavor_id = None
         if instance_id is not None:
             instance = self.nova_client.get_instance(instance_id)
             instance_name = instance.name
-            flavor_id = instance.flavor['id']
+            # flavor_id = instance.flavor['id']
 
-        if self.isValidEmail(user_id):
-            self.send_email(alarm.state,
-                            user_id,
-                            user_id,
+        if self.isValidEmail(email):
+            self.send_email(state,
+                            email,
                             instance_name,
                             reason)
 
     def send_email(self,
                    state,
-                   username,
-                   user_email,
+                   email,
                    instance_name,
                    alarm_desc,
                    ):
@@ -92,11 +92,10 @@ class SafirAlarmService:
                                        login_addr, password)
 
         subject, text, html = self.message_template(state,
-                                           username,
                                            instance_name,
                                            alarm_desc)
-        email_notifier.send_mail(user_email,
-                                 '',
+        email_notifier.send_mail(email,
+                                 subject,
                                  text, html)
 
     def isValidEmail(self, addr):
@@ -109,7 +108,7 @@ class SafirAlarmService:
     def render_template(template_filename, context):
         return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
 
-    def message_template(self, state, username, instance_name, alarm_desc):
+    def message_template(self, state, instance_name, alarm_desc):
 
         filename = ''
         if state == 'alarm':
@@ -119,7 +118,6 @@ class SafirAlarmService:
 
         data = {
             'instance_name': instance_name,
-            'username': username,
             'alarm_desc': alarm_desc
         }
 
@@ -132,7 +130,7 @@ class SafirAlarmService:
             text = 'Dear Safir Cloud Platform User! \
                     \n\n \
                     We realized that the instance ' + instance_name + \
-                    ' of your account ' + username + ' is giving alarm. \
+                    ' of your account is giving alarm. \
                     \n\n \
                     Alarm description is: ' + alarm_desc + \
                     '\n\n \
@@ -146,7 +144,7 @@ class SafirAlarmService:
             text = 'Dear Safir Cloud Platform User! \
                     \n\n \
                     Your instance ' + instance_name + \
-                    ' of your account ' + username + ' back to normal. \
+                    ' of your account back to normal. \
                     \n\n \
                     Sincerely,\
                     \n \

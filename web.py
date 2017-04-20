@@ -34,6 +34,7 @@ def alarm():
                 print (data['alarm_id'])
                 safir_alarm_service = SafirAlarmService()
                 safir_alarm_service.process_alarm(alarm_id=data['alarm_id'],
+                                                  state=data['current'],
                                                   reason=data['reason'])
         except Exception as ex:
             print("ERROR: Failed processing alarm! " + ex.message , file=sys.stderr)

@@ -1,5 +1,5 @@
 from ceilometerclient import client
-from openstack.connector import OpenstackConnector
+from safir_alarm_service.openstack.connector import OpenstackConnector
 
 __ceilometerclient_version__ = '2'
 

@@ -1,5 +1,5 @@
 from novaclient import client
-from openstack.connector import OpenstackConnector
+from safir_alarm_service.openstack.connector import OpenstackConnector
 
 __novaclient_version__ = '2'
 

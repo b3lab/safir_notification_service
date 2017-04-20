@@ -1,10 +1,18 @@
-from openstack.ceillometer.ceilometer import CeilometerClient
-from openstack.nova.nova import NovaClient
+from safir_alarm_service.notification.email_notifier import EmailNotifier
+from safir_alarm_service.openstack.ceillometer.ceilometer import CeilometerClient
+from safir_alarm_service.openstack.nova.nova import NovaClient
+from safir_alarm_service.utils.opts import ConfigOpts
 
-from notification.email_notifier import EmailNotifier
-from utils.opts import ConfigOpts
-
+import os
 import re
+
+from jinja2 import Environment, FileSystemLoader
+
+PATH = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_ENVIRONMENT = Environment(
+    autoescape=False,
+    loader=FileSystemLoader(os.path.join(PATH, 'safir_alarm_service/templates')),
+    trim_blocks=False)
 
 
 class SafirAlarmService:
@@ -41,6 +49,7 @@ class SafirAlarmService:
     def process_alarm(self, alarm_id, reason):
 
         alarm = self.ceilometer_client.get_alarm(alarm_id)
+        status = alarm.status
         print alarm
         print alarm.user_id
         user_id = 'celik.esra@tubitak.gov.tr'  # alarm.user_id
@@ -57,12 +66,14 @@ class SafirAlarmService:
             flavor_id = instance.flavor['id']
 
         if self.isValidEmail(user_id):
-            self.send_email(user_id,
+            self.send_email(status,
+                            user_id,
                             user_id,
                             instance_name,
                             reason)
 
     def send_email(self,
+                   status,
                    username,
                    user_email,
                    instance_name,
@@ -81,11 +92,12 @@ class SafirAlarmService:
         email_notifier = EmailNotifier(smtp_server, smtp_port,
                                        login_addr, password)
 
-        text, html = self.message_template(username,
+        subject, text, html = self.message_template(status,
+                                           username,
                                            instance_name,
                                            alarm_desc)
         email_notifier.send_mail(user_email,
-                                 'ALARM: Safir Cloud Platform Instance Alarm',
+                                 '',
                                  text, html)
 
     def isValidEmail(self, addr):
@@ -95,37 +107,50 @@ class SafirAlarmService:
         return False
 
     @staticmethod
-    def message_template(username, instance_name, alarm_desc):
+    def render_template(template_filename, context):
+        return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
 
-        text = 'Dear Safir Cloud Platform User! \
-                \n\n \
-                We realized that the instance ' + instance_name + \
-                ' of your account ' + username + ' is giving alarm. \
-                \n\n \
-                Alarm description is: ' + alarm_desc + \
-                '\n\n \
-                We suggest you to resize your instance soon. \
-                \n\n \
-                Sincerely,\
-                \n \
-                B3LAB team'
-        html = '<html>\
-            <body>\
-                <p>Dear Safir Cloud Platform User!</p>\
-                <br> <br>\
-                We realized that the instance ' + instance_name + \
-                ' of your account ' + username + ' is giving alarm.\
-                <br> <br>\
-                Alarm description is: ' + alarm_desc + \
-                '<br> <br>\
-                We suggest you to resize your instance soon.<br>\
-                <br> <br>\
-                Sincerely,\
-                <br>\
-                B3LAB team\
-                <br>\
-                <br>\
-            </body>\
-            </html>'
+    def message_template(self, status, username, instance_name, alarm_desc):
 
-        return text, html
+        filename = ''
+        if status == 'alarm':
+            filename = 'alarm.html'
+        elif status == 'ok':
+            filename = 'ok.html'
+
+        data = {
+            'instance_name': instance_name,
+            'username': username,
+            'alarm_desc': alarm_desc
+        }
+
+        html = self.render_template(filename, data)
+
+        subject = ''
+        text = ''
+        if status == 'alarm':
+            subject = 'ALARM: Safir Cloud Platform instance alarm'
+            text = 'Dear Safir Cloud Platform User! \
+                    \n\n \
+                    We realized that the instance ' + instance_name + \
+                    ' of your account ' + username + ' is giving alarm. \
+                    \n\n \
+                    Alarm description is: ' + alarm_desc + \
+                    '\n\n \
+                    We suggest you to resize your instance soon. \
+                    \n\n \
+                    Sincerely,\
+                    \n \
+                    B3LAB team'
+        elif status == 'ok':
+            subject = 'OK: Safir Cloud Platform instance back to normal'
+            text = 'Dear Safir Cloud Platform User! \
+                    \n\n \
+                    Your instance ' + instance_name + \
+                    ' of your account ' + username + ' back to normal. \
+                    \n\n \
+                    Sincerely,\
+                    \n \
+                    B3LAB team'
+
+        return subject, text, html

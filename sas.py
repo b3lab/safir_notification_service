@@ -49,10 +49,9 @@ class SafirAlarmService:
     def process_alarm(self, alarm_id, reason):
 
         alarm = self.ceilometer_client.get_alarm(alarm_id)
-        status = alarm.status
         print alarm
-        print alarm.user_id
-        user_id = 'celik.esra@tubitak.gov.tr'  # alarm.user_id
+        # description area is used to store email address
+        user_id = alarm.description
         instance_id = None
         for s in alarm.threshold_rule['query']:
             if s['field'] == 'resource_id':
@@ -66,14 +65,14 @@ class SafirAlarmService:
             flavor_id = instance.flavor['id']
 
         if self.isValidEmail(user_id):
-            self.send_email(status,
+            self.send_email(alarm.state,
                             user_id,
                             user_id,
                             instance_name,
                             reason)
 
     def send_email(self,
-                   status,
+                   state,
                    username,
                    user_email,
                    instance_name,
@@ -92,7 +91,7 @@ class SafirAlarmService:
         email_notifier = EmailNotifier(smtp_server, smtp_port,
                                        login_addr, password)
 
-        subject, text, html = self.message_template(status,
+        subject, text, html = self.message_template(state,
                                            username,
                                            instance_name,
                                            alarm_desc)
@@ -110,12 +109,12 @@ class SafirAlarmService:
     def render_template(template_filename, context):
         return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
 
-    def message_template(self, status, username, instance_name, alarm_desc):
+    def message_template(self, state, username, instance_name, alarm_desc):
 
         filename = ''
-        if status == 'alarm':
+        if state == 'alarm':
             filename = 'alarm.html'
-        elif status == 'ok':
+        elif state == 'ok':
             filename = 'ok.html'
 
         data = {
@@ -128,7 +127,7 @@ class SafirAlarmService:
 
         subject = ''
         text = ''
-        if status == 'alarm':
+        if state == 'alarm':
             subject = 'ALARM: Safir Cloud Platform instance alarm'
             text = 'Dear Safir Cloud Platform User! \
                     \n\n \
@@ -142,7 +141,7 @@ class SafirAlarmService:
                     Sincerely,\
                     \n \
                     B3LAB team'
-        elif status == 'ok':
+        elif state == 'ok':
             subject = 'OK: Safir Cloud Platform instance back to normal'
             text = 'Dear Safir Cloud Platform User! \
                     \n\n \

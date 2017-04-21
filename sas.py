@@ -141,7 +141,8 @@ class SafirAlarmService:
                                            threshold,
                                            period,
                                            evaluation_periods,
-                                           reason)
+                                           reason,
+                                           email)
         email_notifier.send_mail(email,
                                  subject,
                                  text, html)
@@ -165,7 +166,8 @@ class SafirAlarmService:
                          threshold,
                          period,
                          evaluation_periods,
-                         reason):
+                         reason,
+                         email):
 
         filename = ''
         if state == 'alarm':
@@ -181,7 +183,8 @@ class SafirAlarmService:
             'threshold': threshold,
             'period': period,
             'evaluation_periods': evaluation_periods,
-            'reason': reason
+            'reason': reason,
+            'email': email
         }
 
         html = self.render_template(filename, data)

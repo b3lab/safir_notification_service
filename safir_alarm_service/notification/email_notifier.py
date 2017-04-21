@@ -29,17 +29,21 @@ class EmailNotifier:
 
     def send_mail(self, to_addr, subject, text, html):
 
-        msg = MIMEMultipart('alternative')
-        msg['From'] = self.login_addr
-        msg['To'] = to_addr
-        msg['Subject'] = subject
+        try:
+            self.connect()
+            msg = MIMEMultipart('alternative')
+            msg['From'] = self.login_addr
+            msg['To'] = to_addr
+            msg['Subject'] = subject
 
-        textpart = MIMEText(text)
-        htmlpart = MIMEText(html, 'html')
+            textpart = MIMEText(text, 'plain', 'utf-8')
+            htmlpart = MIMEText(html, 'html', 'utf-8')
 
-        msg.attach(textpart)
-        msg.attach(htmlpart)
+            msg.attach(textpart)
+            msg.attach(htmlpart)
 
-        self.connect()
-        self.mailserver.sendmail(self.login_addr, to_addr, msg.as_string())
-        self.disconnect()
+            self.mailserver.sendmail(self.login_addr, to_addr, msg.as_string())
+        except Exception as ex:
+            print ('ERROR: Email notification not sent. ' + ex.message)
+        finally:
+            self.disconnect()

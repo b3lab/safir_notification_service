@@ -66,18 +66,57 @@ class SafirAlarmService:
             instance_name = instance.name
             # flavor_id = instance.flavor['id']
 
+        resource_type = ''
+        if alarm.threshold_rule['meter_name'] == 'cpu_util':
+            resource_type = 'CPU'
+        elif alarm.threshold_rule['meter_name'] == 'memory_util':
+            resource_type = 'RAM'
+        elif alarm.threshold_rule['meter_name'] == 'disk_util':
+            resource_type = 'Disk'
+        elif alarm.threshold_rule['meter_name'] == 'network.incoming.bytes.rate':
+            resource_type = 'Incoming Network Traffic'
+        elif alarm.threshold_rule['meter_name'] == 'network.outgoing.bytes.rate':
+            resource_type = 'Outgoing Network Traffic'
+
+        comparison_operator = ''
+        if alarm.threshold_rule['comparison_operator'] == 'lt':
+            comparison_operator = 'Less than'
+        elif alarm.threshold_rule['comparison_operator'] == 'le':
+            comparison_operator = 'Less than or equal to'
+        elif alarm.threshold_rule['comparison_operator'] == 'eq':
+            comparison_operator = 'Equal to'
+        elif alarm.threshold_rule['comparison_operator'] == 'ne':
+            comparison_operator = 'Not equal to'
+        elif alarm.threshold_rule['comparison_operator'] == 'ge':
+            comparison_operator = 'Greater than or equal to'
+        elif alarm.threshold_rule['comparison_operator'] == 'gt':
+            comparison_operator = 'Greater than'
+
+        threshold = alarm.threshold_rule['threshold']
+        period = alarm.threshold_rule['period']
+        evaluation_periods = alarm.threshold_rule['evaluation_periods']
+
         if self.isValidEmail(email):
             self.send_email(state,
                             email,
                             instance_name,
+                            resource_type,
+                            comparison_operator,
+                            threshold,
+                            period,
+                            evaluation_periods,
                             reason)
 
     def send_email(self,
                    state,
                    email,
                    instance_name,
-                   alarm_desc,
-                   ):
+                   resource_type,
+                   comparison_operator,
+                   threshold,
+                   period,
+                   evaluation_periods,
+                   reason):
 
         smtp_server = self.configOpts.get_opt('email',
                                               'smtp_server')
@@ -88,12 +127,21 @@ class SafirAlarmService:
         password = self.configOpts.get_opt('email',
                                            'password')
 
+        monitor_panel_url = self.configOpts.get_opt('openstack_monitor_panel',
+                                                    'monitor_panel_url')
+
         email_notifier = EmailNotifier(smtp_server, smtp_port,
                                        login_addr, password)
 
         subject, text, html = self.message_template(state,
                                            instance_name,
-                                           alarm_desc)
+                                           monitor_panel_url,
+                                           resource_type,
+                                           comparison_operator,
+                                           threshold,
+                                           period,
+                                           evaluation_periods,
+                                           reason)
         email_notifier.send_mail(email,
                                  subject,
                                  text, html)
@@ -108,7 +156,16 @@ class SafirAlarmService:
     def render_template(template_filename, context):
         return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
 
-    def message_template(self, state, instance_name, alarm_desc):
+    def message_template(self,
+                         state,
+                         instance_name,
+                         monitor_panel_url,
+                         resource_type,
+                         comparison_operator,
+                         threshold,
+                         period,
+                         evaluation_periods,
+                         reason):
 
         filename = ''
         if state == 'alarm':
@@ -118,7 +175,13 @@ class SafirAlarmService:
 
         data = {
             'instance_name': instance_name,
-            'alarm_desc': alarm_desc
+            'monitor_panel_url': monitor_panel_url,
+            'resource_type': resource_type,
+            'comparison_operator': comparison_operator,
+            'threshold': threshold,
+            'period': period,
+            'evaluation_periods': evaluation_periods,
+            'reason': reason
         }
 
         html = self.render_template(filename, data)
@@ -129,13 +192,11 @@ class SafirAlarmService:
             subject = 'ALARM: Safir Cloud Platform instance alarm'
             text = 'Dear Safir Cloud Platform User! \
                     \n\n \
-                    We realized that the instance ' + instance_name + \
+                    The instance ' + instance_name + \
                     ' of your account is giving alarm. \
                     \n\n \
-                    Alarm description is: ' + alarm_desc + \
+                    Alarm description is: ' + reason + \
                     '\n\n \
-                    We suggest you to resize your instance soon. \
-                    \n\n \
                     Sincerely,\
                     \n \
                     B3LAB team'

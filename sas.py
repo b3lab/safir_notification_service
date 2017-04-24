@@ -46,7 +46,15 @@ class SafirAlarmService:
                                       user_domain_name,
                                       project_domain_name)
 
-    def process_alarm(self, alarm_id, state, reason):
+    def process_alarm(self, alarm_id, current_state, previous_state, reason):
+
+        state = ''
+        if current_state == 'alarm' and previous_state != 'alarm':
+            state = 'alarm'
+        elif current_state == 'ok' and previous_state != 'ok':
+            state = 'ok'
+        else:
+            print ('Same state (' + str(current_state) + ') continues. Skipping...')
 
         alarm = self.ceilometer_client.get_alarm(alarm_id)
         #print alarm

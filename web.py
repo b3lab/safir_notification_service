@@ -31,10 +31,11 @@ def alarm():
                 print("ERROR: Failed processing alarm! " +
                       "Alarm ID not found", file=sys.stderr)
             else:
-                print (data['alarm_id'])
+                print ('ALARM RECEIVED. ID: ' + str(data['alarm_id']))
                 safir_alarm_service = SafirAlarmService()
                 safir_alarm_service.process_alarm(alarm_id=data['alarm_id'],
-                                                  state=data['current'],
+                                                  current_state=data['current'],
+                                                  previous_state=data['previous'],
                                                   reason=data['reason'])
         except Exception as ex:
             print("ERROR: Failed processing alarm! " + ex.message , file=sys.stderr)

@@ -1,4 +1,6 @@
 import smtplib
+from os.path import basename
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -27,7 +29,7 @@ class EmailNotifier:
 
         self.mailserver.quit()
 
-    def send_mail(self, to_addr, subject, text, html):
+    def send_mail(self, to_addr, subject, text, html, files=None):
 
         try:
             self.connect()
@@ -41,6 +43,15 @@ class EmailNotifier:
 
             msg.attach(textpart)
             msg.attach(htmlpart)
+
+            for f in files or []:
+                with open(f, "rb") as fil:
+                    part = MIMEApplication(
+                        fil.read(),
+                        Name=basename(f)
+                    )
+                    part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
+                    msg.attach(part)
 
             self.mailserver.sendmail(self.login_addr, to_addr, msg.as_string())
         except Exception as ex:

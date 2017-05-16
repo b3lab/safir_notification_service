@@ -1,3 +1,8 @@
 flask
 python-ceilometerclient==2.4.0
 python-novaclient==3.3.2
+
+# report generator
+jinja2
+weasyprint
+xlrd

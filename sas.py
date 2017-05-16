@@ -1,18 +1,10 @@
 from safir_alarm_service.notification.email_notifier import EmailNotifier
 from safir_alarm_service.openstack.ceillometer.ceilometer import CeilometerClient
 from safir_alarm_service.openstack.nova.nova import NovaClient
+from safir_alarm_service.report.report_generator import ReportGenerator
+from safir_alarm_service.utils.repeated_timer import RepeatedTimer
 from safir_alarm_service.utils.opts import ConfigOpts
-
-import os
-import re
-
-from jinja2 import Environment, FileSystemLoader
-
-PATH = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_ENVIRONMENT = Environment(
-    autoescape=False,
-    loader=FileSystemLoader(os.path.join(PATH, 'safir_alarm_service/templates')),
-    trim_blocks=False)
+from safir_alarm_service.utils import utils
 
 
 class SafirAlarmService:
@@ -45,6 +37,8 @@ class SafirAlarmService:
                                       auth_project_name,
                                       user_domain_name,
                                       project_domain_name)
+
+        self.report_thread_list = []
 
     def process_alarm(self, alarm_id, current_state, previous_state, reason):
 
@@ -104,7 +98,7 @@ class SafirAlarmService:
         period = alarm.threshold_rule['period']
         evaluation_periods = alarm.threshold_rule['evaluation_periods']
 
-        if self.isValidEmail(email):
+        if utils.is_valid_email(email):
             self.send_email(state,
                             email,
                             instance_name,
@@ -155,16 +149,6 @@ class SafirAlarmService:
                                  subject,
                                  text, html)
 
-    def isValidEmail(self, addr):
-        if len(addr) > 7:
-            if re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", addr) is not None:
-                return True
-        return False
-
-    @staticmethod
-    def render_template(template_filename, context):
-        return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
-
     def message_template(self,
                          state,
                          instance_name,
@@ -195,7 +179,7 @@ class SafirAlarmService:
             'email': email
         }
 
-        html = self.render_template(filename, data)
+        html = utils.render_template(filename, data)
 
         subject = ''
         text = ''
@@ -223,3 +207,13 @@ class SafirAlarmService:
                     B3LAB team'
 
         return subject, text, html
+
+    def send_report(self, email_addr):
+        report_generator = ReportGenerator(email_addr)
+        rt = RepeatedTimer(10, report_generator.generate_report)
+        self.report_thread_list.append(rt)
+
+    def kill_report_threads(self):
+        for rt in self.report_thread_list:
+            print ('killing report thread')
+            rt.stop()

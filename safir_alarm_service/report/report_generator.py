@@ -5,7 +5,13 @@ From pbpython.com
 from __future__ import print_function
 
 from safir_alarm_service.notification.email_notifier import EmailNotifier
+
+from safir_alarm_service.openstack.ceillometer.ceilometer import CeilometerClient
+from safir_alarm_service.openstack.keystone.keystone import KeystoneClient
+from safir_alarm_service.openstack.nova.nova import NovaClient
+
 from safir_alarm_service.utils import utils
+from safir_alarm_service.utils import metering as metering_utils
 from safir_alarm_service.utils.opts import ConfigOpts
 
 import os
@@ -32,6 +38,44 @@ class ReportGenerator:
         self.password = self.configOpts.get_opt('email',
                                                 'password')
 
+        self.admin_monitor_panel_url = self.configOpts.get_opt('openstack_monitor_panel',
+                                                               'admin_monitor_panel_url')
+
+        auth_username = self.configOpts.get_opt('openstack_connection',
+                                                'auth_username')
+        auth_password = self.configOpts.get_opt('openstack_connection',
+                                                'auth_password')
+        auth_url = self.configOpts.get_opt('openstack_connection',
+                                           'auth_url')
+        auth_project_name = self.configOpts.get_opt('openstack_connection',
+                                                    'auth_project_name')
+        user_domain_name = self.configOpts.get_opt('openstack_connection',
+                                                   'user_domain_name')
+        project_domain_name = self.configOpts.get_opt('openstack_connection',
+                                                      'project_domain_name')
+
+        self.ceilometer_client = CeilometerClient(auth_username,
+                                                  auth_password,
+                                                  auth_url,
+                                                  auth_project_name,
+                                                  user_domain_name,
+                                                  project_domain_name)
+
+        self.nova_client = NovaClient(auth_username,
+                                      auth_password,
+                                      auth_url,
+                                      auth_project_name,
+                                      user_domain_name,
+                                      project_domain_name)
+
+        self.keystone_client = KeystoneClient(auth_username,
+                                              auth_password,
+                                              auth_url,
+                                              auth_project_name,
+                                              user_domain_name,
+                                              project_domain_name)
+        self.get_meterings('cpu_util')
+
     def generate_report(self):
 
         filename = './report_cache/B3LAB_CloudReport_' + time.strftime("%Y%m%d-%H%M%S") + '.pdf'
@@ -45,6 +89,36 @@ class ReportGenerator:
 
         self.send_email(self.email_addr, filename)
 
+    def get_meterings(self, meter):
+
+        meter_name = meter.replace(".", "_")
+        date_from = '2017-05-15'
+        date_to = '2017-05-16'
+        stats_attr = 'avg'
+        group_by = 'project'
+
+        try:
+            date_from, date_to = metering_utils.calc_date_args(date_from,
+                                                               date_to)
+        except Exception as ex:
+            print ('Dates cannot be recognized.')
+
+        if group_by == 'project':
+            query = metering_utils.ProjectAggregatesQuery(keystone_client=self.keystone_client,
+                                                          date_from=date_from,
+                                                          date_to=date_to)
+        else:
+            query = metering_utils.MeterQuery(keystone_client=self.keystone_client,
+                                              date_from=date_from,
+                                              date_to=date_to)
+
+        resources, unit = query.query(self.ceilometer_client, meter)
+        series = metering_utils.series_for_meter(resources,
+                                                 group_by, meter,
+                                                 meter_name, stats_attr, unit)
+        print (series)
+
+
     def send_email(self,
                    email,
                    filename):
@@ -52,18 +126,39 @@ class ReportGenerator:
         email_notifier = EmailNotifier(self.smtp_server, self.smtp_port,
                                        self.login_addr, self.password)
 
-        text = 'hello'
-        html = """\
-<html>
-  <head></head>
-  <body>
-    <p>Hello!<br>
-       hello
-    </p>
-  </body>
-</html>
-"""
+        subject, text, html = self.message_template(
+                                      self.admin_monitor_panel_url,
+                                      email)
+
         email_notifier.send_mail(email,
-                                 'Report',
+                                 subject,
                                  text, html, [filename])
-        print ('email sent')
+        print (subject + ' mail sent to ' + email)
+
+    @staticmethod
+    def message_template(admin_monitor_panel_url,
+                         email):
+
+        filename = 'report_mail.html'
+
+        data = {
+            'admin_monitor_panel_url': admin_monitor_panel_url,
+            'email': email
+        }
+
+        html = utils.render_template(filename, data)
+
+        subject = 'Safir Cloud Platform System Usage Report'
+        text = 'Dear Safir Cloud Platform Administrator! \
+                \n\n \
+                The current usage statistics of Safir Cloud Platform \
+                is attached to this mail.\
+                \n\n \
+                You can visit Safir Admin Monitor panel \
+                to see the usage details. \
+                \n\n \
+                Sincerely,\
+                \n \
+                B3LAB team'
+
+        return subject, text, html

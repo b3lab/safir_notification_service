@@ -7,6 +7,8 @@ import sys
 
 from sas import SafirAlarmService
 
+ONE_DAY_IN_SECONDS = 86400
+
 host = '192.168.122.1'
 port = 8080
 
@@ -55,7 +57,11 @@ def report():
             #else:
             #    print ('REPORT request received. ' +
             #           'Admin e-mail: ' + data['email_addr'])
-            safir_alarm_service.send_report(email_addr='celik.esra@tubitak.gov.tr')  # data['email_addr'])
+            #    interval = ONE_DAY_IN_SECONDS
+            #    if 'report_interval' in data:
+            #        interval = data['report_interval']
+            safir_alarm_service.send_report(email_addr='celik.esra@tubitak.gov.tr',  # data['email_addr'],
+                                            report_interval=10)   # interval
         except Exception as ex:
             print("ERROR: Failed processing report! " + ex.message , file=sys.stderr)
     return 'Report request received'

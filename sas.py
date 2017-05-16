@@ -148,9 +148,10 @@ class SafirAlarmService:
         email_notifier.send_mail(email,
                                  subject,
                                  text, html)
+        print (subject + ' mail sent to ' + email)
 
-    def message_template(self,
-                         state,
+    @staticmethod
+    def message_template(state,
                          instance_name,
                          monitor_panel_url,
                          resource_type,
@@ -208,9 +209,9 @@ class SafirAlarmService:
 
         return subject, text, html
 
-    def send_report(self, email_addr):
+    def send_report(self, email_addr, report_interval):
         report_generator = ReportGenerator(email_addr)
-        rt = RepeatedTimer(10, report_generator.generate_report)
+        rt = RepeatedTimer(report_interval, report_generator.generate_report)
         self.report_thread_list.append(rt)
 
     def kill_report_threads(self):

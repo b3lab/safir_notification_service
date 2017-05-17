@@ -14,7 +14,10 @@ from safir_alarm_service.utils import utils
 from safir_alarm_service.utils import metering as metering_utils
 from safir_alarm_service.utils.opts import ConfigOpts
 
+import datetime
 import os
+import json
+from json2html import *
 import time
 from weasyprint import HTML
 
@@ -74,17 +77,26 @@ class ReportGenerator:
                                               auth_project_name,
                                               user_domain_name,
                                               project_domain_name)
-        self.get_meterings('cpu_util')
 
     def generate_report(self):
 
         filename = './report_cache/B3LAB_CloudReport_' + time.strftime("%Y%m%d-%H%M%S") + '.pdf'
 
         print ('Generating report')
-        # We can specify any directory for the loader but for this example, use current directory
-        template_vars = {'Manager_Detail': [[u'Debra Henley', u'<table border="1" class="dataframe">\n  <thead>\n    <tr>\n      <th></th>\n      <th></th>\n      <th colspan="2" halign="left">sum</th>\n      <th colspan="2" halign="left">mean</th>\n    </tr>\n    <tr>\n      <th></th>\n      <th></th>\n      <th>Price</th>\n      <th>Quantity</th>\n      <th>Price</th>\n      <th>Quantity</th>\n    </tr>\n    <tr>\n      <th>Rep</th>\n      <th>Product</th>\n      <th></th>\n      <th></th>\n      <th></th>\n      <th></th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th rowspan="3" valign="top">Craig Booker</th>\n      <th>CPU</th>\n      <td>65000</td>\n      <td>2</td>\n      <td>32500</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <th>Maintenance</th>\n      <td>5000</td>\n      <td>2</td>\n      <td>5000</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <th>Software</th>\n      <td>10000</td>\n      <td>1</td>\n      <td>10000</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <th>Daniel Hilton</th>\n      <th>CPU</th>\n      <td>65000</td>\n      <td>2</td>\n      <td>65000</td>\n      <td>2</td>\n    </tr>\n  </tbody>\n</table>']], 'Software': [1.0, 10000.0], 'CPU': [1.3333333333333333, 43333.333333333336], 'national_pivot_table': u'<table border="1" class="dataframe">\n  <thead>\n    <tr>\n      <th></th>\n      <th></th>\n      <th></th>\n      <th colspan="2" halign="left">sum</th>\n      <th colspan="2" halign="left">mean</th>\n    </tr>\n    <tr>\n      <th></th>\n      <th></th>\n      <th></th>\n      <th>Price</th>\n      <th>Quantity</th>\n      <th>Price</th>\n      <th>Quantity</th>\n    </tr>\n    <tr>\n      <th>Manager</th>\n      <th>Rep</th>\n      <th>Product</th>\n      <th></th>\n      <th></th>\n      <th></th>\n      <th></th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th rowspan="4" valign="top">Debra Henley</th>\n      <th rowspan="3" valign="top">Craig Booker</th>\n      <th>CPU</th>\n      <td>65000</td>\n      <td>2</td>\n      <td>32500</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <th>Maintenance</th>\n      <td>5000</td>\n      <td>2</td>\n      <td>5000</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <th>Software</th>\n      <td>10000</td>\n      <td>1</td>\n      <td>10000</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <th>Daniel Hilton</th>\n      <th>CPU</th>\n      <td>65000</td>\n      <td>2</td>\n      <td>65000</td>\n      <td>2</td>\n    </tr>\n  </tbody>\n</table>', 'title': 'National Sales Funnel Report'}
-        # Render our file and create the PDF using our css style file
-        html_out = utils.render_template('report.html', template_vars)
+
+        data = {'title': 'B3LAB Safir Cloud Platform Daily Usage Statistics',
+                'usage_statistics': []}
+        meters = {'cpu_util': 'CPU Usage',
+                  'memory_util': 'Memory Usage',
+                  'disk_util': 'Disk Usage',
+                  'network.incoming.bytes.rate': 'Incoming Network Bandwidth',
+                  'network.outgoing.bytes.rate': 'Outgoing Network Bandwidth'}
+
+        for meter,title in meters.items():
+            table = self.get_meterings(meter)
+            data['usage_statistics'].append([title, table])
+
+        html_out = utils.render_template('report.html', data)
         HTML(string=html_out).write_pdf(filename, stylesheets=[REPORT_CSS])
 
         self.send_email(self.email_addr, filename)
@@ -92,8 +104,8 @@ class ReportGenerator:
     def get_meterings(self, meter):
 
         meter_name = meter.replace(".", "_")
-        date_from = '2017-05-15'
-        date_to = '2017-05-16'
+        date_from = datetime.datetime.now() - datetime.timedelta(days = 1)
+        date_to = datetime.datetime.now()
         stats_attr = 'avg'
         group_by = 'project'
 
@@ -116,7 +128,15 @@ class ReportGenerator:
         series = metering_utils.series_for_meter(resources,
                                                  group_by, meter,
                                                  meter_name, stats_attr, unit)
-        print (series)
+        meterings = {}
+        for s in series:
+            meterings[s['name']] = OrderedDict()
+            meterings[s['name']]['Metric'] = s['meter']
+            meterings[s['name']]['Usage Average'] = s['data'][0]['y']
+            meterings[s['name']]['Unit'] = s['unit']
+
+        table = json2html.convert(json = json.dumps(meterings), table_attributes="class=\"dataframe\"")
+        return table
 
 
     def send_email(self,

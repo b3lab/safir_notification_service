@@ -12,6 +12,7 @@ ONE_DAY_IN_SECONDS = 86400
 host = '192.168.122.1'
 port = 8080
 
+# Comment out the following lines to run as a Cloud Foundry app
 # host = '0.0.0.0'
 # port = int(sys.argv[1])
 
@@ -22,7 +23,7 @@ safir_alarm_service = SafirAlarmService()
 
 @app.get('/')
 def get_root():
-    return 'Safir Alarm Service'
+    return 'Safir Monitoring Service'
 
 
 @app.route('/alarm', methods=['POST'])
@@ -61,7 +62,7 @@ def report():
             #    if 'report_interval' in data:
             #        interval = data['report_interval']
             safir_alarm_service.send_report(email_addr='celik.esra@tubitak.gov.tr',  # data['email_addr'],
-                                            report_interval=10)   # interval
+                                            report_interval=600)   # interval
         except Exception as ex:
             print("ERROR: Failed processing report! " + ex.message , file=sys.stderr)
     return 'Report request received'

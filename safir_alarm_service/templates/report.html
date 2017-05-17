@@ -6,16 +6,10 @@
 </head>
 <body>
 <div class="container">
-    <h2>Sales Funnel Report - National</h2>
-     {{ national_pivot_table }}
-    {% include "report_summary.html" %}
-</div>
-<div class="container">
-    {% for manager in Manager_Detail %}
+    {% for stat in usage_statistics %}
         <p style="page-break-before: always" ></p>
-        <h2>Sales Funnel Report - {{manager.0}}</h2>
-        {{manager.1}}
-        {% include "report_summary.html" %}
+        <h2>{{stat.0}}</h2>
+        {{stat.1}}
     {% endfor %}
 </div>
 </body>

@@ -1,10 +1,10 @@
-from safir_alarm_service.notification.email_notifier import EmailNotifier
-from safir_alarm_service.openstack.ceillometer.ceilometer import CeilometerClient
-from safir_alarm_service.openstack.nova.nova import NovaClient
-from safir_alarm_service.report.report_generator import ReportGenerator
-from safir_alarm_service.utils.repeated_timer import RepeatedTimer
-from safir_alarm_service.utils.opts import ConfigOpts
-from safir_alarm_service.utils import utils
+from safir_notification_service.notification.email_notifier import EmailNotifier
+from safir_notification_service.openstack.ceillometer.ceilometer import CeilometerClient
+from safir_notification_service.openstack.nova.nova import NovaClient
+from safir_notification_service.report.report_generator import ReportGenerator
+from safir_notification_service.utils.repeated_timer import RepeatedTimer
+from safir_notification_service.utils.opts import ConfigOpts
+from safir_notification_service.utils import utils
 
 
 class SafirAlarmService:

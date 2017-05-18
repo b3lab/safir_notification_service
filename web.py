@@ -18,12 +18,12 @@ port = 8080
 
 Flask.get = lambda self, path: self.route(path, methods=['get'])
 app = Flask(__name__)
-safir_alarm_service = SafirAlarmService()
+safir_notification_service = SafirAlarmService()
 
 
 @app.get('/')
 def get_root():
-    return 'Safir Monitoring Service'
+    return 'Safir Notification Service'
 
 
 @app.route('/alarm', methods=['POST'])
@@ -38,7 +38,7 @@ def alarm():
                 print ('ALARM RECEIVED. ID: ' + str(data['alarm_id']) +\
                        ' Current state: ' + data['current'] +\
                        ' Previous state: ' + data['previous'])
-                safir_alarm_service.process_alarm(alarm_id=data['alarm_id'],
+                safir_notification_service.process_alarm(alarm_id=data['alarm_id'],
                                                   current_state=data['current'],
                                                   previous_state=data['previous'],
                                                   reason=data['reason'])
@@ -61,8 +61,8 @@ def report():
             #    interval = ONE_DAY_IN_SECONDS
             #    if 'report_interval' in data:
             #        interval = data['report_interval']
-            safir_alarm_service.send_report(email_addr='celik.esra@tubitak.gov.tr',  # data['email_addr'],
-                                            report_interval=600)   # interval
+            safir_notification_service.send_report(email_addr='celik.esra@tubitak.gov.tr',  # data['email_addr'],
+                                            report_interval=60)   # interval
         except Exception as ex:
             print("ERROR: Failed processing report! " + ex.message , file=sys.stderr)
     return 'Report request received'
@@ -70,4 +70,4 @@ def report():
 
 if __name__ == "__main__":
     app.run(host=host, port=port)
-    safir_alarm_service.kill_report_threads()
+    safir_notification_service.kill_report_threads()

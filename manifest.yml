@@ -1,6 +1,6 @@
 ---
 applications:
-- name: safir-alarm-service
+- name: safir-notification-service
   memory: 128m
   random-route: true
-  host: safiralarm
+  host: safirnotification

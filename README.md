@@ -1,3 +1,3 @@
-SAFIR ALARM SERVICE
-===================
+SAFIR NOTIFICATION SERVICE
+==========================
 

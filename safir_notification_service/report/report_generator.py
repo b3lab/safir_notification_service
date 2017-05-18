@@ -86,12 +86,12 @@ class ReportGenerator:
 
         data = {'title': 'B3LAB Safir Cloud Platform Daily Usage Statistics',
                 'usage_statistics': []}
-        meters = {'cpu_util': 'CPU Usage'}
-        #meters = {'cpu_util': 'CPU Usage',
-        #          'memory_util': 'Memory Usage',
-        #          'disk_util': 'Disk Usage',
-        #          'network.incoming.bytes.rate': 'Incoming Network Bandwidth',
-        #          'network.outgoing.bytes.rate': 'Outgoing Network Bandwidth'}
+        #meters = {'cpu_util': 'CPU Usage'}
+        meters = {'cpu_util': 'CPU Usage',
+                  'memory_util': 'Memory Usage',
+                  'disk_util': 'Disk Usage',
+                  'network.incoming.bytes.rate': 'Incoming Network Bandwidth',
+                  'network.outgoing.bytes.rate': 'Outgoing Network Bandwidth'}
 
         for meter,title in meters.items():
             table = self.get_meterings(meter)

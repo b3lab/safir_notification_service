@@ -44,7 +44,9 @@ def series_for_meter(aggregates, group_by, meter_id,
             if label:
                 name = label
             else:
-                resource_name = ('id' if group_by == "project"
+                resource_name = ('id'
+                                 if group_by == "project" or
+                                 group_by == "host"
                                  else 'resource_id')
                 resource_id = getattr(resource, resource_name)
                 name = resource_id
@@ -92,6 +94,40 @@ class ProjectAggregatesQuery(object):
                              "value": project.id}]
 
             self.queries[project.name] = project_query
+
+    def query(self, ceilometer_client, meter):
+        unit = get_unit(ceilometer_client, meter)
+        resources = ceilometer_client.resource_aggregates_with_statistics(
+            self.queries, [meter], period=self.period,
+            stats_attr=None,
+            additional_query=self.additional_query)
+        return resources, unit
+
+
+class HostAggregatesQuery(object):
+    def __init__(self, nova_client, date_from, date_to,
+                 period=None, additional_query=None):
+        additional_query = additional_query or []
+        if date_from:
+            additional_query.append({'field': 'timestamp',
+                                     'op': 'ge',
+                                     'value': date_from})
+        if date_to:
+            additional_query.append({'field': 'timestamp',
+                                     'op': 'le',
+                                     'value': date_to})
+        self.period = period
+        self.additional_query = additional_query
+        hosts = nova_client.get_hosts()
+        self.queries = {}
+
+        for host in hosts:
+            host_query = [{
+                "field": "resource_metadata.resource_url",
+                "op": "eq",
+                "value": "snmp://"+host.host_name}]
+
+            self.queries[host.host_name] = host_query
 
     def query(self, ceilometer_client, meter):
         unit = get_unit(ceilometer_client, meter)

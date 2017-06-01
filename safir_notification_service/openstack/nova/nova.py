@@ -29,3 +29,6 @@ class NovaClient:
 
     def get_instance_name(self, instance_id):
         return self.nova_client.servers.get(instance_id)['name']
+
+    def get_hosts(self):
+        return self.nova_client.hosts.list()

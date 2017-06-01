@@ -210,10 +210,10 @@ class SafirAlarmService:
         return subject, text, html
 
     def send_report(self, email_addr, report_interval):
-        report_generator = ReportGenerator(email_addr)
-        report_generator.generate_report()
-        #rt = RepeatedTimer(report_interval, report_generator.generate_report)
-        #self.report_thread_list.append(rt)
+        #report_generator = ReportGenerator(email_addr)
+        #report_generator.generate_report()
+        rt = RepeatedTimer(report_interval, report_generator.generate_report)
+        self.report_thread_list.append(rt)
 
     def kill_report_threads(self):
         for rt in self.report_thread_list:

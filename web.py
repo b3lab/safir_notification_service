@@ -51,18 +51,18 @@ def alarm():
 def report():
     if request.method == 'POST':
         try:
-            #data = json.loads(request.data)
-            #if 'email_addr' not in data:
-            #    print("ERROR: Failed processing report! " +
-            #          "Admin e-mail address not found", file=sys.stderr)
-            #else:
-            #    print ('REPORT request received. ' +
-            #           'Admin e-mail: ' + data['email_addr'])
-            #    interval = ONE_DAY_IN_SECONDS
-            #    if 'report_interval' in data:
-            #        interval = data['report_interval']
-            safir_notification_service.send_report(email_addr='celik.esra@tubitak.gov.tr',  # data['email_addr'],
-                                            report_interval=60)   # interval
+            data = json.loads(request.data)
+            interval = ONE_DAY_IN_SECONDS
+            if 'email_addr' not in data:
+                print("ERROR: Failed processing report! " +
+                      "Admin e-mail address not found", file=sys.stderr)
+            else:
+                print ('REPORT request received. ' +
+                       'Admin e-mail: ' + data['email_addr'])
+                if 'report_interval' in data:
+                    interval = data['report_interval']
+            safir_notification_service.send_report(email_addr=data['email_addr'],
+                                                   report_interval=interval)
         except Exception as ex:
             print("ERROR: Failed processing report! " + ex.message , file=sys.stderr)
     return 'Report request received'

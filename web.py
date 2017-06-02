@@ -1,6 +1,7 @@
 from __future__ import print_function
 from flask import Flask
 from flask import request
+from flask import Response
 
 import json
 import sys
@@ -64,7 +65,10 @@ def alarm():
         except Exception as ex:
             print("ERROR: Failed processing alarm! " + ex.message,
                   file=sys.stderr)
-    return 'Ceilometer alarm received'
+
+    resp = Response("Ceilometer alarm received")
+    resp.status = 'OK'
+    return resp
 
 
 @app.route('/report', methods=['POST'])
@@ -105,7 +109,10 @@ def report():
         except Exception as ex:
             print("ERROR: Failed processing report! " + ex.message,
                   file=sys.stderr)
-    return 'Report request received'
+
+    resp = Response("Report request received")
+    resp.status = 'OK'
+    return resp
 
 
 if __name__ == "__main__":

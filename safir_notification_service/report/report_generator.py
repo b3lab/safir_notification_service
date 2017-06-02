@@ -29,35 +29,31 @@ bps_to_mbps = 0.000001
 
 class ReportGenerator:
 
-    def __init__(self, email_addr):
-        self.configOpts = ConfigOpts()
-
+    def __init__(self, email_addr, openstack_config, panel_config):
+        self.openstack_config = openstack_config
+        self.panel_config = panel_config
         self.email_addr = email_addr
+        self.ceilometer_client = None
+        self.nova_client = None
+        self.keystone_client = None
 
-        self.smtp_server = self.configOpts.get_opt('email',
-                                                   'smtp_server')
-        self.smtp_port = self.configOpts.get_opt('email',
-                                                 'smtp_port')
-        self.login_addr = self.configOpts.get_opt('email',
-                                                  'login_addr')
-        self.password = self.configOpts.get_opt('email',
-                                                'password')
+        self.connect()
 
-        self.admin_monitor_panel_url = self.configOpts.get_opt('openstack_monitor_panel',
-                                                               'admin_monitor_panel_url')
+    def connect(self):
+        config_opts = ConfigOpts()
 
-        auth_username = self.configOpts.get_opt('openstack_connection',
-                                                'auth_username')
-        auth_password = self.configOpts.get_opt('openstack_connection',
-                                                'auth_password')
-        auth_url = self.configOpts.get_opt('openstack_connection',
-                                           'auth_url')
-        auth_project_name = self.configOpts.get_opt('openstack_connection',
-                                                    'auth_project_name')
-        user_domain_name = self.configOpts.get_opt('openstack_connection',
-                                                   'user_domain_name')
-        project_domain_name = self.configOpts.get_opt('openstack_connection',
-                                                      'project_domain_name')
+        auth_username = config_opts.get_opt('openstack_connection',
+                                                 'auth_username')
+        auth_password = config_opts.get_opt('openstack_connection',
+                                                 'auth_password')
+        auth_url = config_opts.get_opt('openstack_connection',
+                                            'auth_url')
+        auth_project_name = config_opts.get_opt('openstack_connection',
+                                                     'auth_project_name')
+        user_domain_name = config_opts.get_opt('openstack_connection',
+                                                    'user_domain_name')
+        project_domain_name = config_opts.get_opt('openstack_connection',
+                                                       'project_domain_name')
 
         self.ceilometer_client = CeilometerClient(auth_username,
                                                   auth_password,
@@ -169,11 +165,25 @@ class ReportGenerator:
                    email,
                    filename):
 
-        email_notifier = EmailNotifier(self.smtp_server, self.smtp_port,
-                                       self.login_addr, self.password)
+        config_opts = ConfigOpts()
+
+        smtp_server = config_opts.get_opt('email',
+                                          'smtp_server')
+        smtp_port = config_opts.get_opt('email',
+                                        'smtp_port')
+        login_addr = config_opts.get_opt('email',
+                                         'login_addr')
+        password = config_opts.get_opt('email',
+                                       'password')
+
+        admin_monitor_panel_url = config_opts.get_opt(self.panel_config,
+                                                      'admin_monitor_panel_url')
+
+        email_notifier = EmailNotifier(smtp_server, smtp_port,
+                                       login_addr, password)
 
         subject, text, html = self.message_template(
-                                      self.admin_monitor_panel_url,
+                                      admin_monitor_panel_url,
                                       email)
 
         email_notifier.send_mail(email,

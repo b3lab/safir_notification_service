@@ -8,7 +8,6 @@ from safir_notification_service.openstack.nova.nova import NovaClient
 from safir_notification_service.utils import utils
 from safir_notification_service.utils.opts import ConfigOpts
 
-import time
 
 class AlarmHandler:
     def __init__(self, openstack_config, panel_config):
@@ -50,7 +49,6 @@ class AlarmHandler:
                                       project_domain_name)
 
     def handle_alarm(self, alarm_id, current_state, previous_state, reason):
-        time.sleep(30)
 
         state = ''
         if current_state == 'alarm' and previous_state != 'alarm':

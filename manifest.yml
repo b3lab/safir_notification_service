@@ -1,0 +1,6 @@
+---
+applications:
+- name: safir-notification-service
+  memory: 512m
+  random-route: true
+  host: safirnotification

@@ -1,0 +1,6 @@
+.venv
+.tox
+.idea/
+*.pyc
+*.pdf
+

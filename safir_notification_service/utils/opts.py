@@ -2,7 +2,7 @@ import ConfigParser
 import os
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-CONFIG_PATH = os.path.join(BASE_DIR, '../conf/safir_notification_service.conf')
+CONFIG_PATH = os.path.join(BASE_DIR, '../../etc/safirnotification.conf')
 
 
 class ConfigOpts(object):

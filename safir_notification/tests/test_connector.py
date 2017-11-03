@@ -3,8 +3,8 @@
 
 import unittest
 
-from safir_notification_service.alarm.alarm_handler import AlarmHandler
-from safir_notification_service.openstack.connector import OpenstackConnector
+from safir_notification.alarm.alarm_handler import AlarmHandler
+from safir_notification.openstack.connector import OpenstackConnector
 
 
 class TestOpenstackConnector(unittest.TestCase):

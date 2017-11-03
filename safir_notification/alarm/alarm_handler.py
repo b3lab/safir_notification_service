@@ -19,9 +19,9 @@ import re
 from safir_email_notifier.email_builder import EmailBuilder
 from safir_email_notifier.email_notifier import EmailNotifier
 
-from safir_notification_service.openstack.connector import OpenstackConnector
-from safir_notification_service.utils import log
-from safir_notification_service.utils.opts import ConfigOpts
+from safir_notification.openstack.connector import OpenstackConnector
+from safir_notification.utils import log
+from safir_notification.utils.opts import ConfigOpts
 
 LOG = log.get_logger()
 

@@ -14,7 +14,7 @@
 from keystoneauth1 import exceptions as ka_exceptions
 from aodhclient.v2 import client as aodh_client
 from openstack import connection
-from safir_notification.utils import log
+from safirnotification.utils import log
 from os_client_config import config as cloud_config
 
 LOG = log.get_logger()

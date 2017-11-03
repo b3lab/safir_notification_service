@@ -6,9 +6,9 @@ import argparse
 import json
 import sys
 
-from safir_notification.alarm.alarm_handler import AlarmHandler
-from safir_notification.utils import log
-from safir_notification.utils.opts import ConfigOpts
+from safirnotification.alarm.alarm_handler import AlarmHandler
+from safirnotification.utils import log
+from safirnotification.utils.opts import ConfigOpts
 
 LOG = log.get_logger()
 

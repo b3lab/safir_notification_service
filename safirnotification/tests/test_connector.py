@@ -11,7 +11,6 @@ class TestOpenstackConnector(unittest.TestCase):
     openstack_conn = OpenstackConnector('altyapitest-admin')
 
     def test_template(self):
-        print('HERE')
         self.assertTrue(True)
 
     def test_openstackclient(self):

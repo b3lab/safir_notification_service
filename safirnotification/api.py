@@ -16,7 +16,7 @@ LOG = log.get_logger()
 Flask.get = lambda self, path: self.route(path, methods=['get'])
 app = Flask(__name__)
 
-alarm_handler = AlarmHandler()
+alarm_handler = None
 
 
 @app.route('/alarm', methods=['POST'])
@@ -26,10 +26,10 @@ def alarm():
             data = json.loads(request.data)
 
             if 'alarm_id' not in data:
-                LOG.ERROR("Failed processing alarm! " +
+                LOG.error("Failed processing alarm! " +
                           "Alarm ID not found", file=sys.stderr)
             else:
-                LOG.INFO('ALARM RECEIVED. ID: ' + str(data['alarm_id']) +
+                LOG.info('ALARM RECEIVED. ID: ' + str(data['alarm_id']) +
                          ' Current state: ' + data['current'] +
                          ' Previous state: ' + data['previous'])
                 alarm_handler.handle_alarm(
@@ -39,8 +39,7 @@ def alarm():
                         reason=data['reason'])
 
         except Exception as ex:
-            LOG.ERROR("Failed processing alarm! " + ex.message,
-                      file=sys.stderr)
+            LOG.error("Failed processing alarm! " + ex.message)
 
     return "AODH alarm received"
 
@@ -54,6 +53,9 @@ def main():
     if config_file is None:
         print('usage: safirnotification -c <config-file-path>')
         sys.exit(2)
+
+    global alarm_handler
+    alarm_handler = AlarmHandler(config_file)
 
     config_opts = ConfigOpts(config_file)
     host = config_opts.get_opt('api', 'host')

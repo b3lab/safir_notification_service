@@ -27,10 +27,10 @@ LOG = log.get_logger()
 
 
 class AlarmHandler:
-    def __init__(self):
+    def __init__(self, config_file):
         self.openstack_connector = None
 
-        config_opts = ConfigOpts()
+        config_opts = ConfigOpts(config_file)
         openstack_config_name = config_opts.get_opt('DEFAULT',
                                                     'openstack_config_name')
         self.openstack_connector = OpenstackConnector(openstack_config_name)
@@ -159,6 +159,7 @@ class AlarmHandler:
     @staticmethod
     def is_valid_email(mail):
         if len(mail) > 7:
-            if re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", mail) is not None:
+            if re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)",
+                        mail) is not None:
                 return True
         return False

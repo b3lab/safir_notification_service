@@ -3,4 +3,5 @@
 .idea/
 *.pyc
 *.pdf
-
+eggs/
+*.egg-info/

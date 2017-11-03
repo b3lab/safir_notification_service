@@ -1,13 +1,4 @@
 flask
-
-# use the compatible versions with
-# your OpenStack environment
-python-ceilometerclient==2.4.0
-python-novaclient==3.3.2
-
-# report generator requirements
-cffi
-jinja2
-json2html
-weasyprint
-xlrd
+aodhclient>=0.8.0
+python-openstackclient>=3.8.1
+safir_email_notifier

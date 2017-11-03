@@ -14,26 +14,28 @@ Install Safir Email Notifier library::
 
     git clone https://github.com/b3lab/safir_email_notifier.git
     cd safir_email_notifier
-    python setup.py install
+    sudo pip install -r requirements.txt
+    sudo python setup.py install
 
 Retrieve and install Safir Notification Service::
 
     git clone https://github.com/b3lab/safir_notification_service.git
     cd safir_notification_service
-    python setup.py install
+    sudo pip install -r requirements.txt
+    sudo python setup.py install
 
 This procedure installs the ``safirnotification`` python library and the
 ``safirnotification`` executable
 
 Install configuration files::
 
-    mkdir /etc/safirnotification
-    cp etc/safirnotification/safirnotification.conf /etc/safirnotification/safirnotification.conf
-    cp etc/safirnotification.service /etc/systemd/system/safirnotification.service
+    sudo mkdir /etc/safirnotification
+    sudo cp etc/safirnotification.conf /etc/safirnotification/safirnotification.conf
+    sudo cp etc/safirnotification.service /etc/systemd/system/safirnotification.service
 
 Create the log directory::
 
-    mkdir /var/log/safirnotification/
+    sudo mkdir /var/log/safirnotification/
 
 Configuration
 -------------
@@ -111,5 +113,5 @@ Start service
 
 Start safirnotification service::
 
-    systemctl start safirnotification.service
+    sudo systemctl start safirnotification.service
 

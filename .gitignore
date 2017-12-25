@@ -3,3 +3,6 @@
 *.pyc
 *.pdf
 *.egg-info
+AUTHORS
+ChangeLog
+build/

@@ -59,7 +59,7 @@ def main():
 
     config_opts = ConfigOpts(config_file)
     host = config_opts.get_opt('api', 'host')
-    port = config_opts.get_opt('api', 'port')
+    port = int(config_opts.get_opt('api', 'port'))
 
     app.run(host=host, port=port, threaded=True)
 

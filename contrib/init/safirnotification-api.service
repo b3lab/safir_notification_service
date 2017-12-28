@@ -1,0 +1,11 @@
+[Unit]
+Description=SafirNotification API Service
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=safirnotification
+ExecStart=/usr/bin/safirnotification-api --logfile /var/log/safirnotification/safirnotification-api.log --config-file /etc/safirnotification/safirnotification.conf
+
+[Install]
+WantedBy=multi-user.target

@@ -1,8 +1,73 @@
-.venv
+*_backup.txt
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+.venv/
+env/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.eggs/
+safirbilling.egg-info
 .idea/
-*.pyc
-*.pdf
-*.egg-info
+
+# Configuration file
+etc/safirbilling/safirbilling.conf.sample
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.testrepository
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+cover
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+doc/build/
+
+# Rope
+.ropeproject/
+
+# Others
+*.sqlite
+*.swp
+*~
+*.swn
+*.swo
+*.DS_Store
+
+# tox -e docs
 AUTHORS
 ChangeLog
-build/
+
+releasenotes/build
+

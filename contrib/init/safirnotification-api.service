@@ -4,8 +4,8 @@ After=syslog.target network.target
 
 [Service]
 Type=simple
-User=safirnotification
-ExecStart=/usr/bin/safirnotification-api --logfile /var/log/safirnotification/safirnotification-api.log --config-file /etc/safirnotification/safirnotification.conf
+User=root
+ExecStart=/usr/local/bin/safirnotification-api --logfile /var/log/safirnotification/safirnotification-api.log --config-file /etc/safirnotification/safirnotification.conf
 
 [Install]
 WantedBy=multi-user.target

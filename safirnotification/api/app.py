@@ -32,12 +32,7 @@ auth_opts = [
     cfg.StrOpt('api_paste_config',
                default="api_paste.ini",
                help="Configuration file for WSGI definition of API."
-               ),
-    cfg.StrOpt('auth_strategy',
-               choices=['noauth', 'keystone'],
-               default='keystone',
-               help=("The strategy to use for auth. Supports noauth and "
-                     "keystone")),
+               )
 ]
 
 api_opts = [

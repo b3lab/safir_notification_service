@@ -55,24 +55,8 @@ The following shows the basic configuration items:
     [cloud]
     cloud_name = cloud-admin
 
-    [keystone_authtoken]
-    auth_url = http://CONTROLLER_HOST:5000/
-    identity_uri = http://CONTROLLER_HOST:35357/
-    project_name = service
-    user_domain_name = Default
-    project_domain_name = Default
-    password = PASSWORD
-    username = USERNAME
-    auth_type = password
-
 Setup Keystone
 ==============
-
-To integrate safirnotification to Keystone, run the following commands (as OpenStack
-administrator)::
-
-    openstack user create safirnotification --password SAFIRNOTIFICATION_PASS
-    openstack role add --project service --user safirnotification admin
 
 safirnotification uses the clouds.yaml file in one of the following directories to connect
 the OpenStack services::

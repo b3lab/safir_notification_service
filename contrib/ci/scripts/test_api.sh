@@ -20,7 +20,7 @@ export TOKEN=`curl -i -H "Content-Type: application/json" -d '
         }
       }
    }
-}' "http://altyapitest.b3lab.org:35357/v3/auth/tokens" | awk '/X-Subject-Token/ {print $2}'`
+}' "http://172.16.1.43/identity/v3/auth/tokens" | awk '/X-Subject-Token/ {print $2}'`
 
 
 test_info ()

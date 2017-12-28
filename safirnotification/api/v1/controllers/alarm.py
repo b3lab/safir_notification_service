@@ -23,26 +23,42 @@ import wsmeext.pecan as wsme_pecan
 
 class Alarm(wtypes.Base):
 
-    id = wtypes.text
-    status = wtypes.text
+    alarm_id = wtypes.text
+    current = wtypes.text
+    previous = wtypes.text
+    reason = wtypes.text
 
     @classmethod
-    def sample(cls,
-               id,
-               status):
-        return cls(id=id,
-                   status=status)
+    def sample(cls, alarm_id,
+               current, previous,
+               reason):
+        return cls(alarm_id=alarm_id,
+                   current=current,
+                   previous=previous,
+                   reason=reason)
 
     def to_json(self):
-        res_dict = {'id': self.id,
-                    'status': self.status,
-                    'timestamp': self.timestamp}
+        res_dict = {'alarm_id': self.alarm_id,
+                    'current': self.current,
+                    'previous': self.previous,
+                    'reason': self.reason}
         return res_dict
 
 
 class AlarmController(rest.RestController):
+    _custom_actions = {'alarm': ['POST']}
 
     @wsme_pecan.wsexpose(Alarm)
     def get_all(self):
-        alarm = Alarm.sample('1', '3')
+        alarm = Alarm.sample('1', '3', '23', 'f')
         return alarm
+
+    @wsme_pecan.wsexpose(body=Alarm,
+                         status_code=302)
+    def alarm(self, alarm_body):
+        print(alarm_body.alarm_id)
+        print(alarm_body.current)
+        print(alarm_body.previous)
+        print(alarm_body.reason)
+
+        pecan.response.location = pecan.request.path

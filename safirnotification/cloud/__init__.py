@@ -21,7 +21,11 @@ cloud_opts = [
                help="Cloud config name"),
     cfg.StrOpt('identity_api_version',
                default='3',
-               help="Keystone identity API version")
+               help="Keystone identity API version"),
+    cfg.StrOpt('horizon_url',
+               default='http://127.0.0.1/horizon/',
+               help="OpenStack Dashboard URL to be send with "
+                    "notification mail"),
 ]
 
 CONF = cfg.CONF

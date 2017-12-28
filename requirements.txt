@@ -1,4 +1,0 @@
-flask
-aodhclient>=0.9.0
-python-openstackclient>=3.12.0
-safir_email_notifier

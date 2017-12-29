@@ -160,3 +160,40 @@
 
 # Keystone identity API version (string value)
 #identity_api_version = 3
+
+# OpenStack Dashboard URL to be send with notification mail (string
+# value)
+#horizon_url = http://127.0.0.1/horizon/
+
+
+[email_server]
+
+#
+# From safirnotification.common.config
+#
+
+# SMTP Server Host (string value)
+#smtp_server = smtp.a.com
+
+# SMTP Server Port (string value)
+#smtp_port = 587
+
+# SMTP Server Login Address (string value)
+#login_address = a@a.com
+
+# SMTP Server Login Password (string value)
+#password = secret
+
+# Use TLS protocol if True. (string value)
+#use_tls = True
+
+
+[oslo_middleware]
+
+#
+# From oslo.middleware.http_proxy_to_wsgi
+#
+
+# Whether the application is behind a proxy or not. This determines if
+# the middleware should parse the headers or not. (boolean value)
+#enable_proxy_headers_parsing = false

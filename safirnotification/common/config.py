@@ -17,6 +17,7 @@ import itertools
 
 import safirnotification.api.app
 import safirnotification.cloud
+import safirnotification.notifier
 import safirnotification.service
 
 __all__ = ['list_opts']
@@ -26,6 +27,8 @@ _opts = [
         safirnotification.api.app.api_opts,))),
     ('cloud', list(itertools.chain(
         safirnotification.cloud.cloud_opts))),
+    ('email_server', list(itertools.chain(
+        safirnotification.notifier.email_server_opts))),
     (None, list(itertools.chain(
         safirnotification.api.app.auth_opts,
         safirnotification.service.service_opts)))

@@ -17,7 +17,28 @@ from oslo_config import cfg
 from safir_email_notifier.email_builder import EmailBuilder
 from safir_email_notifier.email_notifier import EmailNotifier
 
+email_server_opts = [
+    cfg.StrOpt('smtp_server',
+               default='',
+               help="SMTP Server Host"),
+    cfg.StrOpt('smtp_port',
+               default='',
+               help="SMTP Server Port"),
+    cfg.StrOpt('login_address',
+               default='',
+               help="SMTP Server Login Address"),
+    cfg.StrOpt('password',
+               default='',
+               help="SMTP Server Login Password"),
+    cfg.StrOpt('use_tls',
+               default='True',
+               help="Use TLS protocol if True.")
+]
+
+
 CONF = cfg.CONF
+CONF.register_opts(email_server_opts, 'email_server')
+
 LOG = logging.getLogger(__name__)
 
 
@@ -66,9 +87,7 @@ class Notifier(object):
         :param mail_data: mail data constructed by _generate_mail_data
         :param to_list: mail receptors list
         """
-
         try:
-
             template_name = None
             if state == 'alarm':
                 template_name = 'alarm_alarm'
@@ -79,14 +98,15 @@ class Notifier(object):
             mail_builder = EmailBuilder(template_name)
             subject, text, html = mail_builder.get_mail_content(mail_data)
             mail_notifier = EmailNotifier(
-                CONF.email_notifier.EMAIL_HOST,
-                CONF.email_notifier.EMAIL_PORT,
-                CONF.email_notifier.EMAIL_HOST_USER,
-                CONF.email_notifier.EMAIL_HOST_PASSWORD)
+                CONF.email_server.smtp_server,
+                CONF.email_server.smtp_port,
+                CONF.email_server.login_address,
+                CONF.email_server.password)
 
             # Send e-mail
             mail_notifier.send_mail(to_list, subject, text, html)
-
             LOG.info("Notification email sent successfully.")
         except Exception as ex:
             LOG.error("Notification email not sent. " + ex.message)
+            return False
+        return True

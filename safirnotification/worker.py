@@ -37,6 +37,9 @@ class Worker:
         self.openstack_connector = OpenstackManager(CONF.cloud.cloud_name)
 
     def handle_alarm(self, alarm_id, current_state, previous_state, reason):
+        LOG.info('New alarm notification received. Alarm id: %s, '
+                 'current state: %s, previous state: %s, reason: %s.',
+                 alarm_id, current_state, previous_state, reason)
 
         state = ''
         if current_state == 'alarm' and previous_state != 'alarm':
@@ -115,9 +118,13 @@ class Worker:
                                                     threshold,
                                                     evaluation_periods,
                                                     reason)
-            notifier.send_notification_mail(state,
-                                            mail_data,
-                                            [email])
+            if notifier.send_notification_mail(state,
+                                               mail_data,
+                                               [email]):
+                LOG.info('Notification e-mail sent to recipient %s.', email)
+        else:
+            LOG.error('Notification e-mail not sent. '
+                      '%s is not a valid e-mail address.', email)
 
         return
 

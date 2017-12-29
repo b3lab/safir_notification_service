@@ -13,32 +13,51 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import datetime
 import pecan
 from pecan import rest
-import six
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
+
+from safirnotification.worker import Worker
+
+
+class ReasonData(wtypes.Base):
+    count = int
+    most_recent = float
+    type = wtypes.text
+    disposition = wtypes.text
 
 
 class Alarm(wtypes.Base):
 
+    alarm_name = wtypes.text
     alarm_id = wtypes.text
+    severity = wtypes.text
     current = wtypes.text
     previous = wtypes.text
     reason = wtypes.text
+    reason_data = ReasonData
 
     @classmethod
-    def sample(cls, alarm_id,
-               current, previous,
-               reason):
-        return cls(alarm_id=alarm_id,
+    def sample(cls, alarm_name,
+               alarm_id,
+               severity,
+               current,
+               previous,
+               reason,
+               reason_data):
+        return cls(alarm_name=alarm_name,
+                   alarm_id=alarm_id,
+                   severity=severity,
                    current=current,
                    previous=previous,
-                   reason=reason)
+                   reason=reason,
+                   reason_data=reason_data)
 
     def to_json(self):
-        res_dict = {'alarm_id': self.alarm_id,
+        res_dict = {'alarm_name': self.alarm_name,
+                    'alarm_id': self.alarm_id,
+                    'severity': self.severity,
                     'current': self.current,
                     'previous': self.previous,
                     'reason': self.reason}
@@ -46,19 +65,19 @@ class Alarm(wtypes.Base):
 
 
 class AlarmController(rest.RestController):
-    _custom_actions = {'alarm': ['POST']}
 
-    @wsme_pecan.wsexpose(Alarm)
+    @wsme_pecan.wsexpose(wtypes.text)
     def get_all(self):
-        alarm = Alarm.sample('1', '3', '23', 'f')
-        return alarm
+        return 'success'
 
     @wsme_pecan.wsexpose(body=Alarm,
                          status_code=302)
-    def alarm(self, alarm_body):
-        print(alarm_body.alarm_id)
-        print(alarm_body.current)
-        print(alarm_body.previous)
-        print(alarm_body.reason)
+    def post(self, data):
+
+        worker = Worker()
+        worker.handle_alarm(alarm_id=data.alarm_id,
+                            current_state=data.current,
+                            previous_state=data.previous,
+                            reason=data.reason)
 
         pecan.response.location = pecan.request.path

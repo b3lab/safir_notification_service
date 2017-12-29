@@ -55,6 +55,13 @@ The following shows the basic configuration items:
     [cloud]
     cloud_name = cloud-admin
 
+    [email_server]
+    smtp_server = smtp.a.com
+    smtp_port = 587
+    login_address = a@a.com
+    password = secret
+    use_tls = True
+
 Setup Keystone
 ==============
 
